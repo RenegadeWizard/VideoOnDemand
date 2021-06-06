@@ -33,13 +33,10 @@ public class MovieApi {
     }
 
     @PutMapping("/{mid}")
-    public void updateMovie(@PathVariable String mid) {
-        Optional<Movie> optionalVideo = movieRepository.findById(Integer.parseInt(mid));
-        if (optionalVideo.isPresent()) {
-            // TODO
-        } else {
-            throw new ObjectNotInDatabaseException(mid, "MOVIES");
-        }
+    public void updateMovie(@PathVariable String mid, @RequestBody Movie movie) {
+        movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
+        movie.setId(Integer.parseInt(mid));
+        movieRepository.save(movie);
     }
 
     @DeleteMapping("/{mid}")
@@ -48,12 +45,20 @@ public class MovieApi {
     }
 
     @PatchMapping("/{mid}")
-    public void patchMovie(@PathVariable String mid) {
-        Optional<Movie> optionalVideo = movieRepository.findById(Integer.parseInt(mid));
-        if (optionalVideo.isPresent()) {
-            // TODO
-        } else {
-            throw new ObjectNotInDatabaseException(mid, "MOVIES");
+    public void patchMovie(@PathVariable String mid, @RequestBody Movie movie) {
+        Movie movieToUpdate = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
+        if (movie.getName() != null) {
+            movieToUpdate.setName(movie.getName());
         }
+        if (movie.getDescription() != null) {
+            movieToUpdate.setDescription(movie.getDescription());
+        }
+        if (movie.getTime() != null) {
+            movieToUpdate.setTime(movie.getTime());
+        }
+        if (movie.getReleaseYear() != null) {
+            movieToUpdate.setReleaseYear(movie.getReleaseYear());
+        }
+        movieRepository.save(movieToUpdate);
     }
 }

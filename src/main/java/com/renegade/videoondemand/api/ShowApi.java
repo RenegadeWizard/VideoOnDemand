@@ -1,5 +1,6 @@
 package com.renegade.videoondemand.api;
 
+import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.entity.Series;
 import com.renegade.videoondemand.domain.repository.ShowRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
@@ -33,13 +34,10 @@ public class ShowApi {
     }
 
     @PutMapping("/{sid}")
-    public void updateShow(@PathVariable String sid) {
-        Optional<Series> optionalShow = showRepository.findById(Integer.parseInt(sid));
-        if (optionalShow.isPresent()) {
-            // TODO
-        } else {
-            throw new ObjectNotInDatabaseException(sid, "SHOWS");
-        }
+    public void updateShow(@PathVariable String sid, @RequestBody Series show) {
+        showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
+        show.setId(Integer.parseInt(sid));
+        showRepository.save(show);
     }
 
     @DeleteMapping("/{sid}")
@@ -48,13 +46,18 @@ public class ShowApi {
     }
 
     @PatchMapping("/{sid}")
-    public void patchShow(@PathVariable String sid) {
-        Optional<Series> optionalShow = showRepository.findById(Integer.parseInt(sid));
-        if (optionalShow.isPresent()) {
-            // TODO
-        } else {
-            throw new ObjectNotInDatabaseException(sid, "SHOWS");
+    public void patchShow(@PathVariable String sid, @RequestBody Series show) {
+        Series showToUpdate = showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
+        if (show.getName() != null) {
+            showToUpdate.setName(show.getName());
         }
+        if (show.getSeasons() != null) {
+            showToUpdate.setSeasons(show.getSeasons());
+        }
+        if (show.getReleaseYear() != null) {
+            showToUpdate.setReleaseYear(show.getReleaseYear());
+        }
+        showRepository.save(showToUpdate);
     }
 
 }

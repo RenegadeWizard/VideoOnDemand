@@ -45,10 +45,14 @@ public class FavoritesApi {
     }
 
     @PatchMapping("/{fid}")
-    public void patchFavorite(@RequestHeader("token") String token, @PathVariable String fid) {
+    public void patchFavorite(@RequestHeader("token") String token, @PathVariable String fid, @RequestBody Favorite rateFavorite) {
         User user = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(RuntimeException::new);
-        // TODO
+        if (!user.getFavorites().contains(favorite)) {
+            throw new FailedAuthenticationException();
+        }
+        favorite.setRate(rateFavorite.getRate());
+        favoritesRepository.save(favorite);
     }
 
 }
