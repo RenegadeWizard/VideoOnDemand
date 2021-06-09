@@ -8,9 +8,10 @@ import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.FailedAuthenticationException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/favorites")
@@ -21,12 +22,14 @@ public class FavoritesApi {
     private final FavoritesRepository favoritesRepository;
 
     @GetMapping
-    public List<Favorite> getAllFavorites(@RequestHeader("token") String token) {
+    public Page<Favorite> getAllFavorites(@RequestHeader("token") String token, Pageable pageable) {
         if (token == null) {
             throw new FailedAuthenticationException();
         }
         User user = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
-        return user.getFavorites();
+        final int start = (int) pageable.getOffset();
+        final int end = Math.min((start + pageable.getPageSize()), user.getFavorites().size());
+        return new PageImpl<>(user.getFavorites().subList(start, end), pageable, user.getFavorites().size());
     }
 
     @PostMapping
