@@ -7,7 +7,11 @@ import com.renegade.videoondemand.exception.FailedAuthenticationException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.exception.UserAlreadyExistsException;
 import com.renegade.videoondemand.exception.UserDoesNotExistException;
+import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,6 +23,11 @@ public class AccountsApi {
     private final TokenRepository tokenRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
+    @GetMapping
+    public Page<User> getAllUsers(Pageable pageable) {
+        return userRepository.findAll(pageable);
+    }
+
     @PostMapping
     public void createNewAccount(User user) {
         if (userRepository.findById(user.getUsername()).isPresent()) {
@@ -29,15 +38,22 @@ public class AccountsApi {
     }
 
     @GetMapping("/{username}")
-    public User getUser(@PathVariable String username) {
-        return userRepository.findById(username).orElseThrow(UserDoesNotExistException::new);
+    public ResponseEntity<User> getUser(@PathVariable String username) {
+        User user = userRepository
+                .findById(username)
+                .orElseThrow(UserDoesNotExistException::new);
+        return ResponseEntity.ok()
+                .eTag(user.getVersion().toString())
+                .body(user);
     }
 
     @PutMapping("/{username}")
-    public void updateUser(@PathVariable String username, @RequestBody User user) {
-        user.setUsername(username);
+    public void updateUser(@PathVariable String username, @RequestBody User user,
+                           @RequestHeader("If-Match") String ifMatch) {
+        User userInDatabase = userRepository.findById(username).orElseThrow(UserDoesNotExistException::new);
+        EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
-        userRepository.save(user);
+        userRepository.save(userInDatabase.cloneAll(user));
     }
 
     @DeleteMapping("/{username}")
@@ -48,13 +64,11 @@ public class AccountsApi {
     }
 
     @PatchMapping("/{username}")
-    public void patchUser(@PathVariable String username, @RequestBody User user) {
-        User userToUpdate = userRepository.findById(username).orElseThrow(FailedAuthenticationException::new);
-        if (user.getEmail() != null) {
-            userToUpdate.setEmail(user.getEmail());
-        }
-        if (user.getPassword() != null) {
-            userToUpdate.setPassword(encoder.encode(user.getPassword()));
-        }
+    public void patchUser(@PathVariable String username, @RequestBody User user,
+                          @RequestHeader("If-Match") String ifMatch) {
+        User userToUpdate = userRepository.findById(username).orElseThrow(UserDoesNotExistException::new);
+        user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);
+        EtagHelper.checkEtagCorrectness(userToUpdate.getVersion(), ifMatch);
+        userRepository.save(userToUpdate.cloneSome(user));
     }
 }

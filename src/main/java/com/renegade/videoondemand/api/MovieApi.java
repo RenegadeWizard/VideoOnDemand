@@ -39,8 +39,11 @@ public class MovieApi {
     }
 
     @PutMapping("/{mid}")
-    public void updateMovie(@PathVariable String mid, @RequestBody Movie movie, @RequestHeader("If-Match") String ifMatch) {
-        Movie movieInDatabase = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
+    public void updateMovie(@PathVariable String mid, @RequestBody Movie movie,
+                            @RequestHeader("If-Match") String ifMatch) {
+        Movie movieInDatabase = movieRepository
+                .findById(Integer.parseInt(mid))
+                .orElseThrow(ObjectNotInDatabaseException::new);
         EtagHelper.checkEtagCorrectness(movieInDatabase.getVersion(), ifMatch);
         movieRepository.save(movieInDatabase.cloneAll(movie));
     }

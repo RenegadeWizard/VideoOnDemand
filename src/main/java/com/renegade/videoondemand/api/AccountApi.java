@@ -4,7 +4,9 @@ import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.FailedAuthenticationException;
+import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
@@ -17,16 +19,23 @@ public class AccountApi {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
-    public User getUser(@RequestHeader("token") String token) {
-        return tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
+    public ResponseEntity<User> getUser(@RequestHeader("token") String token) {
+        User user = tokenRepository
+                .findById(token)
+                .orElseThrow(FailedAuthenticationException::new)
+                .getUser();
+        return ResponseEntity.ok()
+                .eTag(user.getVersion().toString())
+                .body(user);
     }
 
     @PutMapping
-    public void updateUser(@RequestHeader("token") String token, @RequestBody User user) {
-        String username = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser().getUsername();
-        user.setUsername(username);
+    public void updateUser(@RequestHeader("token") String token, @RequestBody User user,
+                           @RequestHeader("If-Match") String ifMatch) {
+        User userInDatabase = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
+        EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
-        userRepository.save(user);
+        userRepository.save(userInDatabase.cloneAll(user));
     }
 
     @DeleteMapping
@@ -37,14 +46,12 @@ public class AccountApi {
     }
 
     @PatchMapping
-    public void patchUser(@RequestHeader("token") String token, @RequestBody User user) {
-        User userToUpdate = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
-        if (user.getEmail() != null) {
-            userToUpdate.setEmail(user.getEmail());
-        }
-        if (user.getPassword() != null) {
-            userToUpdate.setPassword(encoder.encode(user.getPassword()));
-        }
+    public void patchUser(@RequestHeader("token") String token, @RequestBody User user,
+                          @RequestHeader("If-Match") String ifMatch) {
+        User userInDatabase = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
+        EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
+        user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);
+        userRepository.save(userInDatabase.cloneSome(user));
     }
 
 

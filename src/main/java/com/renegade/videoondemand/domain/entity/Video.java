@@ -19,4 +19,16 @@ public class Video {
     @JsonIgnore
     @Version
     private Integer version;
+
+    @Transient
+    public void cloneAll(Video video) {
+        this.name = video.name;
+        this.releaseYear = video.releaseYear;
+    }
+
+    @Transient
+    public void cloneSome(Video video) {
+        this.name = video.name != null ? video.name : this.name;
+        this.releaseYear = video.releaseYear != null ? video.releaseYear : this.releaseYear;
+    }
 }

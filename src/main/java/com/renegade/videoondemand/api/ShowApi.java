@@ -4,9 +4,11 @@ import com.renegade.videoondemand.domain.entity.Series;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.ShowRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
+import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Optional;
@@ -29,16 +31,21 @@ public class ShowApi {
     }
 
     @GetMapping("/{sid}")
-    public Series getShow(@PathVariable String sid) {
-        Optional<Series> optionalShow = showRepository.findById(Integer.parseInt(sid));
-        return optionalShow.orElse(null);
+    public ResponseEntity<Series> getShow(@PathVariable String sid) {
+        Series show = showRepository
+                .findById(Integer.parseInt(sid))
+                .orElseThrow(ObjectNotInDatabaseException::new);
+        return ResponseEntity.ok()
+                .eTag(show.getVersion().toString())
+                .body(show);
     }
 
     @PutMapping("/{sid}")
-    public void updateShow(@PathVariable String sid, @RequestBody Series show) {
-        showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
-        show.setId(Integer.parseInt(sid));
-        showRepository.save(show);
+    public void updateShow(@PathVariable String sid, @RequestBody Series show,
+                           @RequestHeader("If-Match") String ifMatch) {
+        Series showInDatabase = showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
+        EtagHelper.checkEtagCorrectness(showInDatabase.getVersion(), ifMatch);
+        showRepository.save(showInDatabase.cloneAll(show));
     }
 
     @DeleteMapping("/{sid}")
@@ -49,18 +56,11 @@ public class ShowApi {
     }
 
     @PatchMapping("/{sid}")
-    public void patchShow(@PathVariable String sid, @RequestBody Series show) {
+    public void patchShow(@PathVariable String sid, @RequestBody Series show,
+                          @RequestHeader("If-Match") String ifMatch) {
         Series showToUpdate = showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
-        if (show.getName() != null) {
-            showToUpdate.setName(show.getName());
-        }
-        if (show.getSeasons() != null) {
-            showToUpdate.setSeasons(show.getSeasons());
-        }
-        if (show.getReleaseYear() != null) {
-            showToUpdate.setReleaseYear(show.getReleaseYear());
-        }
-        showRepository.save(showToUpdate);
+        EtagHelper.checkEtagCorrectness(showToUpdate.getVersion(), ifMatch);
+        showRepository.save(showToUpdate.cloneSome(show));
     }
 
 }

@@ -15,8 +15,7 @@ public class Movie extends Video {
 
     @Transient
     public Movie cloneAll(Movie movie) {
-        this.name = movie.name;
-        this.releaseYear = movie.releaseYear;
+        super.cloneAll(movie);
         this.time = movie.time;
         this.description = movie.description;
         return this;
@@ -24,8 +23,7 @@ public class Movie extends Video {
 
     @Transient
     public Movie cloneSome(Movie movie) {
-        this.name = movie.name != null ? movie.name : this.name;
-        this.releaseYear = movie.releaseYear != null ? movie.releaseYear : this.releaseYear;
+        super.cloneSome(movie);
         this.time = movie.time != null ? movie.time : this.time;
         this.description = movie.description != null ? movie.description : this.description;
         return this;

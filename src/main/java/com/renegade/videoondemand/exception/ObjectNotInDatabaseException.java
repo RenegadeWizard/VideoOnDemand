@@ -1,8 +1,9 @@
 package com.renegade.videoondemand.exception;
 
-import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.ResponseStatus;
 
-@RequiredArgsConstructor
+@ResponseStatus(code = HttpStatus.NOT_FOUND)
 public class ObjectNotInDatabaseException extends RuntimeException {
     @Override
     public String getMessage() {
