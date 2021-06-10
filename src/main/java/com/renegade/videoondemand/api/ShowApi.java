@@ -1,6 +1,5 @@
 package com.renegade.videoondemand.api;
 
-import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.entity.Series;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.ShowRepository;

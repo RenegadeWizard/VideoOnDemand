@@ -3,8 +3,8 @@ package com.renegade.videoondemand.domain.entity;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Data;
 
-import javax.persistence.*;
-import java.util.List;
+import javax.persistence.Entity;
+import javax.persistence.Id;
 
 @Entity
 @Data
@@ -14,7 +14,4 @@ public class User {
     @JsonIgnore
     private String password;
     private String email;
-//    @JsonIgnore
-//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-//    private List<Token> tokens;
 }

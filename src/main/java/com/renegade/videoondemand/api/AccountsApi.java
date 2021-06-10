@@ -1,6 +1,5 @@
 package com.renegade.videoondemand.api;
 
-import com.renegade.videoondemand.domain.entity.Token;
 import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
