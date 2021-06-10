@@ -44,9 +44,7 @@ public class AccountsApi {
     @DeleteMapping("/{username}")
     public void deleteUser(@PathVariable String username) {
         User user = userRepository.findById(username).orElseThrow(ObjectNotInDatabaseException::new);
-        for (Token userToken: user.getTokens()) {
-            tokenRepository.deleteById(userToken.getValue());
-        }
+        tokenRepository.findAllByUserEquals(user).forEach(tokenRepository::delete);
         userRepository.deleteById(username);
     }
 

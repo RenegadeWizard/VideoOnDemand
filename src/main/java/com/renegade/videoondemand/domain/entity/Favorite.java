@@ -17,5 +17,7 @@ public class Favorite {
     private Integer id;
     @ManyToOne
     private Video video;
+    @OneToOne
+    private User user;
     private String rate;
 }

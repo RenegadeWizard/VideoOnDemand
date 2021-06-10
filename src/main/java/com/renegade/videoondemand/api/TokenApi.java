@@ -34,8 +34,8 @@ public class TokenApi {
         return token.getValue();
     }
 
-    @DeleteMapping("/{token}")
-    public void deleteToken(@PathVariable String token) {
+    @DeleteMapping
+    public void deleteToken(@RequestHeader("token") String token) {
         tokenRepository.deleteById(token);
     }
     

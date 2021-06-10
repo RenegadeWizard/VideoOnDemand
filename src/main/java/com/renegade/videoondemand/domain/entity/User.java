@@ -14,10 +14,7 @@ public class User {
     @JsonIgnore
     private String password;
     private String email;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Token> tokens;
-    @JsonIgnore
-    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<Favorite> favorites;
+//    @JsonIgnore
+//    @OneToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+//    private List<Token> tokens;
 }

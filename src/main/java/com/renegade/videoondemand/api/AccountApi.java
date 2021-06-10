@@ -1,6 +1,5 @@
 package com.renegade.videoondemand.api;
 
-import com.renegade.videoondemand.domain.entity.Token;
 import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
@@ -33,9 +32,7 @@ public class AccountApi {
     @DeleteMapping
     public void deleteUser(@RequestHeader("token") String token) {
         User user = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
-        for (Token userToken: user.getTokens()) {
-            tokenRepository.deleteById(userToken.getValue());
-        }
+        tokenRepository.findAllByUserEquals(user).forEach(tokenRepository::delete);
         userRepository.deleteById(user.getUsername());
     }
 

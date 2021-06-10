@@ -1,7 +1,9 @@
 package com.renegade.videoondemand.api;
 
-import com.renegade.videoondemand.domain.entity.Token;
+import com.renegade.videoondemand.domain.entity.Favorite;
 import com.renegade.videoondemand.domain.entity.User;
+import com.renegade.videoondemand.domain.entity.Video;
+import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
@@ -11,21 +13,39 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/merge")
 @RequiredArgsConstructor
 public class MergeApi {
     private final UserRepository userRepository;
     private final TokenRepository tokenRepository;
+    private final FavoritesRepository favoritesRepository;
 
     @PostMapping("/{username1}/{username2}")
     public void mergeTwoAccounts(@PathVariable String username1, @PathVariable String username2) {
         User user1 = userRepository.findById(username1).orElseThrow(ObjectNotInDatabaseException::new);
         User user2 = userRepository.findById(username2).orElseThrow(ObjectNotInDatabaseException::new);
-        user1.getFavorites().addAll(user2.getFavorites());
-        for (Token userToken: user2.getTokens()) {
-            tokenRepository.deleteById(userToken.getValue());
-        }
+        mergeFavorites(user1, user2);
+        tokenRepository.findAllByUserEquals(user2).forEach(tokenRepository::delete);
         userRepository.deleteById(user2.getUsername());
+    }
+
+    private void mergeFavorites(User user1, User user2) {
+        List<Integer> userFavorites = favoritesRepository.findAllByUserEquals(user1)
+                .stream()
+                .map(Favorite::getVideo)
+                .map(Video::getId)
+                .collect(Collectors.toList());
+        for (Favorite favorite : favoritesRepository.findAllByUserEquals(user2)) {
+            if (userFavorites.contains(favorite.getVideo().getId())) {
+                favoritesRepository.delete(favorite);
+            } else {
+                favorite.setUser(user1);
+                favoritesRepository.save(favorite);
+            }
+        }
     }
 }

@@ -1,6 +1,7 @@
 package com.renegade.videoondemand.api;
 
 import com.renegade.videoondemand.domain.entity.Movie;
+import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.MovieRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import lombok.RequiredArgsConstructor;
@@ -15,6 +16,7 @@ import java.util.Optional;
 @RequiredArgsConstructor
 public class MovieApi {
     private final MovieRepository movieRepository;
+    private final FavoritesRepository favoritesRepository;
 
     @GetMapping
     public Page<Movie> getMovies(Pageable pageable) {
@@ -41,6 +43,8 @@ public class MovieApi {
 
     @DeleteMapping("/{mid}")
     public void deleteMovie(@PathVariable String mid) {
+        Movie movie = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
+        favoritesRepository.findAllByVideoEquals(movie).forEach(favoritesRepository::delete);
         movieRepository.deleteById(Integer.parseInt(mid));
     }
 
