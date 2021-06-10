@@ -9,7 +9,6 @@ import javax.persistence.*;
 
 @Entity
 @Data
-@AllArgsConstructor
 @NoArgsConstructor
 public class Favorite {
     @Id
@@ -21,4 +20,13 @@ public class Favorite {
     @OneToOne
     private User user;
     private String rate;
+    @JsonIgnore
+    @Version
+    private Integer version;
+
+    public Favorite(Video video, User user) {
+        this.video = video;
+        this.user = user;
+    }
+
 }
