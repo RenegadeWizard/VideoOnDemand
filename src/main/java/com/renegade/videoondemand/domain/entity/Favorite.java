@@ -1,5 +1,6 @@
 package com.renegade.videoondemand.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -16,6 +17,7 @@ public class Favorite {
     private Integer id;
     @ManyToOne
     private Video video;
+    @JsonIgnore
     @OneToOne
     private User user;
     private String rate;

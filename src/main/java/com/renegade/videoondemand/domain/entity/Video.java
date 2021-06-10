@@ -1,5 +1,6 @@
 package com.renegade.videoondemand.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -15,4 +16,7 @@ public class Video {
     protected Integer id;
     protected String name;
     protected Integer releaseYear;
+    @JsonIgnore
+    @Version
+    private Integer version;
 }

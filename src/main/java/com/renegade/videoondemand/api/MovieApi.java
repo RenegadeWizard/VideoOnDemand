@@ -4,12 +4,12 @@ import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.MovieRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
+import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.Optional;
 
 @RestController
 @RequestMapping("/movies")
@@ -29,16 +29,20 @@ public class MovieApi {
     }
 
     @GetMapping("/{mid}")
-    public Movie getMovie(@PathVariable String mid) {
-        Optional<Movie> optionalVideo = movieRepository.findById(Integer.parseInt(mid));
-        return optionalVideo.orElse(null);
+    public ResponseEntity<Movie> getMovie(@PathVariable String mid) {
+        Movie movie = movieRepository
+                .findById(Integer.parseInt(mid))
+                .orElseThrow(ObjectNotInDatabaseException::new);
+        return ResponseEntity.ok()
+                .eTag(movie.getVersion().toString())
+                .body(movie);
     }
 
     @PutMapping("/{mid}")
-    public void updateMovie(@PathVariable String mid, @RequestBody Movie movie) {
-        movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
-        movie.setId(Integer.parseInt(mid));
-        movieRepository.save(movie);
+    public void updateMovie(@PathVariable String mid, @RequestBody Movie movie, @RequestHeader("If-Match") String ifMatch) {
+        Movie movieInDatabase = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
+        EtagHelper.checkEtagCorrectness(movieInDatabase.getVersion(), ifMatch);
+        movieRepository.save(movieInDatabase.cloneAll(movie));
     }
 
     @DeleteMapping("/{mid}")
@@ -49,20 +53,9 @@ public class MovieApi {
     }
 
     @PatchMapping("/{mid}")
-    public void patchMovie(@PathVariable String mid, @RequestBody Movie movie) {
+    public void patchMovie(@PathVariable String mid, @RequestBody Movie movie, @RequestHeader("If-Match") String ifMatch) {
         Movie movieToUpdate = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
-        if (movie.getName() != null) {
-            movieToUpdate.setName(movie.getName());
-        }
-        if (movie.getDescription() != null) {
-            movieToUpdate.setDescription(movie.getDescription());
-        }
-        if (movie.getTime() != null) {
-            movieToUpdate.setTime(movie.getTime());
-        }
-        if (movie.getReleaseYear() != null) {
-            movieToUpdate.setReleaseYear(movie.getReleaseYear());
-        }
-        movieRepository.save(movieToUpdate);
+        EtagHelper.checkEtagCorrectness(movieToUpdate.getVersion(), ifMatch);
+        movieRepository.save(movieToUpdate.cloneSome(movie));
     }
 }
