@@ -1,12 +1,11 @@
 package com.renegade.videoondemand.api;
 
 import com.renegade.videoondemand.domain.entity.User;
-import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
-import com.renegade.videoondemand.exception.FailedAuthenticationException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.exception.UserAlreadyExistsException;
 import com.renegade.videoondemand.exception.UserDoesNotExistException;
+import com.renegade.videoondemand.service.TokenService;
 import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -20,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class AccountsApi {
     private final UserRepository userRepository;
-    private final TokenRepository tokenRepository;
+    private final TokenService tokenService;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
@@ -59,7 +58,7 @@ public class AccountsApi {
     @DeleteMapping("/{username}")
     public void deleteUser(@PathVariable String username) {
         User user = userRepository.findById(username).orElseThrow(ObjectNotInDatabaseException::new);
-        tokenRepository.findAllByUserEquals(user).forEach(tokenRepository::delete);
+        tokenService.deleteAllUserTokens(user.getUsername());
         userRepository.deleteById(username);
     }
 

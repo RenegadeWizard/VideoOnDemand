@@ -1,11 +1,7 @@
 package com.renegade.videoondemand.domain.repository;
 
-import com.renegade.videoondemand.domain.entity.Token;
-import com.renegade.videoondemand.domain.entity.User;
+import com.renegade.videoondemand.domain.entity.PostToken;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
-
-public interface TokenRepository extends CrudRepository<Token, String> {
-    List<Token> findAllByUserEquals(User user);
+public interface TokenRepository extends CrudRepository<PostToken, String> {
 }
