@@ -31,7 +31,7 @@ public class AccountApi {
 
     @PutMapping
     public void updateUser(@RequestHeader("token") String token, @RequestBody User user,
-                           @RequestHeader("If-Match") String ifMatch) {
+                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         User userInDatabase = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
@@ -47,7 +47,7 @@ public class AccountApi {
 
     @PatchMapping
     public void patchUser(@RequestHeader("token") String token, @RequestBody User user,
-                          @RequestHeader("If-Match") String ifMatch) {
+                          @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         User userInDatabase = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);

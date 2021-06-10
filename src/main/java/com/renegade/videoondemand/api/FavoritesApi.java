@@ -63,7 +63,7 @@ public class FavoritesApi {
 
     @PatchMapping("/{fid}")
     public void patchFavorite(@RequestHeader("token") String token,
-                              @RequestHeader("If-Match") String ifMatch,
+                              @RequestHeader(value = "If-Match", required=false) String ifMatch,
                               @PathVariable String fid, @RequestBody Favorite rateFavorite) {
         User user = tokenRepository.findById(token).orElseThrow(FailedAuthenticationException::new).getUser();
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);

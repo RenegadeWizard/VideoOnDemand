@@ -49,7 +49,7 @@ public class AccountsApi {
 
     @PutMapping("/{username}")
     public void updateUser(@PathVariable String username, @RequestBody User user,
-                           @RequestHeader("If-Match") String ifMatch) {
+                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         User userInDatabase = userRepository.findById(username).orElseThrow(UserDoesNotExistException::new);
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
@@ -65,7 +65,7 @@ public class AccountsApi {
 
     @PatchMapping("/{username}")
     public void patchUser(@PathVariable String username, @RequestBody User user,
-                          @RequestHeader("If-Match") String ifMatch) {
+                          @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         User userToUpdate = userRepository.findById(username).orElseThrow(UserDoesNotExistException::new);
         user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);
         EtagHelper.checkEtagCorrectness(userToUpdate.getVersion(), ifMatch);

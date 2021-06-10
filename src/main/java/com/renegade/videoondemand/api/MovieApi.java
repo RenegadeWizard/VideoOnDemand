@@ -3,6 +3,7 @@ package com.renegade.videoondemand.api;
 import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.MovieRepository;
+import com.renegade.videoondemand.exception.EtagNotProvidedException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +41,7 @@ public class MovieApi {
 
     @PutMapping("/{mid}")
     public void updateMovie(@PathVariable String mid, @RequestBody Movie movie,
-                            @RequestHeader("If-Match") String ifMatch) {
+                            @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         Movie movieInDatabase = movieRepository
                 .findById(Integer.parseInt(mid))
                 .orElseThrow(ObjectNotInDatabaseException::new);
@@ -56,7 +57,8 @@ public class MovieApi {
     }
 
     @PatchMapping("/{mid}")
-    public void patchMovie(@PathVariable String mid, @RequestBody Movie movie, @RequestHeader("If-Match") String ifMatch) {
+    public void patchMovie(@PathVariable String mid, @RequestBody Movie movie,
+                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         Movie movieToUpdate = movieRepository.findById(Integer.parseInt(mid)).orElseThrow(ObjectNotInDatabaseException::new);
         EtagHelper.checkEtagCorrectness(movieToUpdate.getVersion(), ifMatch);
         movieRepository.save(movieToUpdate.cloneSome(movie));

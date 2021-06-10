@@ -42,7 +42,7 @@ public class ShowApi {
 
     @PutMapping("/{sid}")
     public void updateShow(@PathVariable String sid, @RequestBody Series show,
-                           @RequestHeader("If-Match") String ifMatch) {
+                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         Series showInDatabase = showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
         EtagHelper.checkEtagCorrectness(showInDatabase.getVersion(), ifMatch);
         showRepository.save(showInDatabase.cloneAll(show));
@@ -57,7 +57,7 @@ public class ShowApi {
 
     @PatchMapping("/{sid}")
     public void patchShow(@PathVariable String sid, @RequestBody Series show,
-                          @RequestHeader("If-Match") String ifMatch) {
+                          @RequestHeader(value = "If-Match", required=false) String ifMatch) {
         Series showToUpdate = showRepository.findById(Integer.parseInt(sid)).orElseThrow(ObjectNotInDatabaseException::new);
         EtagHelper.checkEtagCorrectness(showToUpdate.getVersion(), ifMatch);
         showRepository.save(showToUpdate.cloneSome(show));
