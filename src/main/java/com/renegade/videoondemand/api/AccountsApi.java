@@ -1,8 +1,10 @@
 package com.renegade.videoondemand.api;
 
 import com.renegade.videoondemand.domain.entity.User;
+import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
+import com.renegade.videoondemand.exception.TokenDoesNotExistException;
 import com.renegade.videoondemand.exception.UserAlreadyExistsException;
 import com.renegade.videoondemand.exception.UserDoesNotExistException;
 import com.renegade.videoondemand.service.TokenService;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.*;
 public class AccountsApi {
     private final UserRepository userRepository;
     private final TokenService tokenService;
+    private final TokenRepository tokenRepository;
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
@@ -28,7 +31,10 @@ public class AccountsApi {
     }
 
     @PostMapping
-    public void createNewAccount(User user) {
+    public void createNewAccount(@RequestParam("token") String token, User user) {
+        if (!tokenRepository.existsById(token)) {
+            throw new TokenDoesNotExistException();
+        }
         if (userRepository.findById(user.getUsername()).isPresent()) {
             throw new UserAlreadyExistsException();
         }

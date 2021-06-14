@@ -3,7 +3,9 @@ package com.renegade.videoondemand.api;
 import com.renegade.videoondemand.domain.entity.Series;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.ShowRepository;
+import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
+import com.renegade.videoondemand.exception.TokenDoesNotExistException;
 import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import java.util.Optional;
 public class ShowApi {
     private final ShowRepository showRepository;
     private final FavoritesRepository favoritesRepository;
+    private final TokenRepository tokenRepository;
 
     @GetMapping()
     public Page<Series> getAllShows(Pageable pageable) {
@@ -26,7 +29,11 @@ public class ShowApi {
     }
 
     @PostMapping
-    public void addNewShow(@RequestBody Series series) {
+    public void addNewShow(@RequestBody Series series, @RequestParam("token") String token) {
+        if (!tokenRepository.existsById(token)) {
+            throw new TokenDoesNotExistException();
+        }
+        tokenRepository.deleteById(token);
         showRepository.save(series);
     }
 

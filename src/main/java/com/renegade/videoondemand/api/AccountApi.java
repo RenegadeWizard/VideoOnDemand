@@ -18,33 +18,33 @@ public class AccountApi {
     private final BCryptPasswordEncoder encoder = new BCryptPasswordEncoder();
 
     @GetMapping
-    public ResponseEntity<User> getUser(@RequestHeader("token") String token) {
-        User user = tokenService.getUserByToken(token);
+    public ResponseEntity<User> getUser(@RequestHeader("sessionID") String sessionID) {
+        User user = tokenService.getUserByToken(sessionID);
         return ResponseEntity.ok()
                 .eTag(user.getVersion().toString())
                 .body(user);
     }
 
     @PutMapping
-    public void updateUser(@RequestHeader("token") String token, @RequestBody User user,
+    public void updateUser(@RequestHeader("sessionID") String sessionID, @RequestBody User user,
                            @RequestHeader(value = "If-Match", required=false) String ifMatch) {
-        User userInDatabase = tokenService.getUserByToken(token);
+        User userInDatabase = tokenService.getUserByToken(sessionID);
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(userInDatabase.cloneAll(user));
     }
 
     @DeleteMapping
-    public void deleteUser(@RequestHeader("token") String token) {
-        User user = tokenService.getUserByToken(token);
+    public void deleteUser(@RequestHeader("sessionID") String sessionID) {
+        User user = tokenService.getUserByToken(sessionID);
         tokenService.deleteAllUserTokens(user.getUsername());
         userRepository.deleteById(user.getUsername());
     }
 
     @PatchMapping
-    public void patchUser(@RequestHeader("token") String token, @RequestBody User user,
+    public void patchUser(@RequestHeader("sessionID") String sessionID, @RequestBody User user,
                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
-        User userInDatabase = tokenService.getUserByToken(token);
+        User userInDatabase = tokenService.getUserByToken(sessionID);
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);
         userRepository.save(userInDatabase.cloneSome(user));

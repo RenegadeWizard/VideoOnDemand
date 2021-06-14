@@ -4,6 +4,7 @@ import com.renegade.videoondemand.domain.entity.Favorite;
 import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.entity.Video;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
+import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.service.TokenService;

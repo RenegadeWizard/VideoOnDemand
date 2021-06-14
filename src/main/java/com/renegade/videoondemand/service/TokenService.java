@@ -3,7 +3,7 @@ package com.renegade.videoondemand.service;
 import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.FailedAuthenticationException;
-import com.renegade.videoondemand.exception.TokenDoesNotExistException;
+import com.renegade.videoondemand.exception.SessionDoesNotExistException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -33,7 +33,7 @@ public class TokenService {
 
     public void deleteToken(String token) {
         if (!tokens.containsKey(token)) {
-            throw new TokenDoesNotExistException();
+            throw new SessionDoesNotExistException();
         }
         tokens.remove(token);
     }
@@ -44,7 +44,7 @@ public class TokenService {
 
     public User getUserByToken(String token) {
         if (!tokens.containsKey(token)) {
-            throw new TokenDoesNotExistException();
+            throw new SessionDoesNotExistException();
         }
         return userRepository
                 .findById(tokens.get(token))

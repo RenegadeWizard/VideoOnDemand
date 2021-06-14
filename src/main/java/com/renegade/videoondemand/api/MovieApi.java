@@ -3,8 +3,10 @@ package com.renegade.videoondemand.api;
 import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.MovieRepository;
+import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.exception.EtagNotProvidedException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
+import com.renegade.videoondemand.exception.TokenDoesNotExistException;
 import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -18,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 public class MovieApi {
     private final MovieRepository movieRepository;
     private final FavoritesRepository favoritesRepository;
+    private final TokenRepository tokenRepository;
 
     @GetMapping
     public Page<Movie> getMovies(Pageable pageable) {
@@ -25,7 +28,11 @@ public class MovieApi {
     }
 
     @PostMapping
-    public void addNewMovie(@RequestBody Movie movie) {
+    public void addNewMovie(@RequestBody Movie movie, @RequestParam("token") String token) {
+        if (!tokenRepository.existsById(token)) {
+            throw new TokenDoesNotExistException();
+        }
+        tokenRepository.deleteById(token);
         movieRepository.save(movie);
     }
 
