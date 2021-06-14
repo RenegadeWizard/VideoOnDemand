@@ -9,7 +9,7 @@ import com.renegade.videoondemand.domain.repository.VideoRepository;
 import com.renegade.videoondemand.exception.FailedAuthenticationException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.exception.TokenDoesNotExistException;
-import com.renegade.videoondemand.service.TokenService;
+import com.renegade.videoondemand.service.SessionService;
 import com.renegade.videoondemand.util.EtagHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -21,7 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/favorites")
 @RequiredArgsConstructor
 public class FavoritesApi {
-    private final TokenService tokenService;
+    private final SessionService sessionService;
     private final FavoritesRepository favoritesRepository;
     private final VideoRepository videoRepository;
     private final TokenRepository tokenRepository;
@@ -31,7 +31,7 @@ public class FavoritesApi {
         if (sessionID == null) {
             throw new FailedAuthenticationException();
         }
-        User user = tokenService.getUserByToken(sessionID);
+        User user = sessionService.getUserByToken(sessionID);
         return favoritesRepository.findAllByUserEquals(user, pageable);
     }
 
@@ -39,7 +39,7 @@ public class FavoritesApi {
     public void addVideoToFavorites(@RequestHeader("sessionID") String session,
                                     @RequestParam("token") String token,
                                     @RequestBody Video video) {
-        User user = tokenService.getUserByToken(session);
+        User user = sessionService.getUserByToken(session);
         if (!tokenRepository.existsById(token)) {
             throw new TokenDoesNotExistException();
         }
@@ -51,7 +51,7 @@ public class FavoritesApi {
     @GetMapping("/{fid}")
     public ResponseEntity<Favorite> getFavorite(@RequestHeader("sessionID") String sessionID,
                                                 @PathVariable String fid) {
-        User user = tokenService.getUserByToken(sessionID);
+        User user = sessionService.getUserByToken(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();
@@ -64,7 +64,7 @@ public class FavoritesApi {
     @DeleteMapping("/{fid}")
     public void deleteVideoFromFavorites(@RequestHeader("sessionID") String sessionID,
                                          @PathVariable String fid) {
-        User user = tokenService.getUserByToken(sessionID);
+        User user = sessionService.getUserByToken(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();
@@ -76,7 +76,7 @@ public class FavoritesApi {
     public void patchFavorite(@RequestHeader("sessionID") String sessionID,
                               @RequestHeader(value = "If-Match", required=false) String ifMatch,
                               @PathVariable String fid, @RequestBody Favorite rateFavorite) {
-        User user = tokenService.getUserByToken(sessionID);
+        User user = sessionService.getUserByToken(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();

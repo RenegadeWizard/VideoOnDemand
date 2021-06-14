@@ -11,7 +11,7 @@ import javax.persistence.Id;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class PostToken {
+public class Token {
     @Id
     private String value;
 }

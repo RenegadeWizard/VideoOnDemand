@@ -4,7 +4,6 @@ import com.renegade.videoondemand.domain.entity.Movie;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
 import com.renegade.videoondemand.domain.repository.MovieRepository;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
-import com.renegade.videoondemand.exception.EtagNotProvidedException;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
 import com.renegade.videoondemand.exception.TokenDoesNotExistException;
 import com.renegade.videoondemand.util.EtagHelper;

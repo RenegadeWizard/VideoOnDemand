@@ -1,6 +1,6 @@
 package com.renegade.videoondemand.api;
 
-import com.renegade.videoondemand.domain.entity.PostToken;
+import com.renegade.videoondemand.domain.entity.Token;
 import com.renegade.videoondemand.domain.repository.TokenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -11,16 +11,16 @@ import java.security.SecureRandom;
 import java.util.Base64;
 
 @RestController
-@RequestMapping("/post-tokens")
+@RequestMapping("/tokens")
 @RequiredArgsConstructor
-public class PostTokenApi {
+public class TokenApi {
     private final TokenRepository tokenRepository;
 
     @PostMapping
-    public PostToken createToken() {
+    public Token createToken() {
         SecureRandom random = new SecureRandom();
         String tokenValue = Base64.getEncoder().encodeToString(random.generateSeed(16)).replaceAll("\\+", "#").replaceAll("/", "\\$");
-        PostToken token = new PostToken(tokenValue);
+        Token token = new Token(tokenValue);
         tokenRepository.save(token);
         return token;
     }

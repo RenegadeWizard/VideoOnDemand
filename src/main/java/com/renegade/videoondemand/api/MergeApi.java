@@ -4,10 +4,9 @@ import com.renegade.videoondemand.domain.entity.Favorite;
 import com.renegade.videoondemand.domain.entity.User;
 import com.renegade.videoondemand.domain.entity.Video;
 import com.renegade.videoondemand.domain.repository.FavoritesRepository;
-import com.renegade.videoondemand.domain.repository.TokenRepository;
 import com.renegade.videoondemand.domain.repository.UserRepository;
 import com.renegade.videoondemand.exception.ObjectNotInDatabaseException;
-import com.renegade.videoondemand.service.TokenService;
+import com.renegade.videoondemand.service.SessionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -22,7 +21,7 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class MergeApi {
     private final UserRepository userRepository;
-    private final TokenService tokenService;
+    private final SessionService sessionService;
     private final FavoritesRepository favoritesRepository;
 
     @PostMapping("/{username1}/{username2}")
@@ -30,7 +29,7 @@ public class MergeApi {
         User user1 = userRepository.findById(username1).orElseThrow(ObjectNotInDatabaseException::new);
         User user2 = userRepository.findById(username2).orElseThrow(ObjectNotInDatabaseException::new);
         mergeFavorites(user1, user2);
-        tokenService.deleteAllUserTokens(user2.getUsername());
+        sessionService.deleteAllUserTokens(user2.getUsername());
         userRepository.deleteById(user2.getUsername());
     }
 
