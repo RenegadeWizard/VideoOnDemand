@@ -19,7 +19,7 @@ public class TokenApi {
     @PostMapping
     public Token createToken() {
         SecureRandom random = new SecureRandom();
-        String tokenValue = Base64.getEncoder().encodeToString(random.generateSeed(16)).replaceAll("\\+", "#").replaceAll("/", "\\$");
+        String tokenValue = Base64.getEncoder().encodeToString(random.generateSeed(16)).replaceAll("\\+", "!").replaceAll("/", "\\$");
         Token token = new Token(tokenValue);
         tokenRepository.save(token);
         return token;
