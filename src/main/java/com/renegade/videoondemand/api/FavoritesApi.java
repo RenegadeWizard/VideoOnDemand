@@ -31,7 +31,7 @@ public class FavoritesApi {
         if (sessionID == null) {
             throw new FailedAuthenticationException();
         }
-        User user = sessionService.getUserByToken(sessionID);
+        User user = sessionService.getUserBySession(sessionID);
         return favoritesRepository.findAllByUserEquals(user, pageable);
     }
 
@@ -39,7 +39,7 @@ public class FavoritesApi {
     public void addVideoToFavorites(@RequestHeader("sessionID") String session,
                                     @RequestParam("token") String token,
                                     @RequestBody Video video) {
-        User user = sessionService.getUserByToken(session);
+        User user = sessionService.getUserBySession(session);
         if (!tokenRepository.existsById(token)) {
             throw new TokenDoesNotExistException();
         }
@@ -51,7 +51,7 @@ public class FavoritesApi {
     @GetMapping("/{fid}")
     public ResponseEntity<Favorite> getFavorite(@RequestHeader("sessionID") String sessionID,
                                                 @PathVariable String fid) {
-        User user = sessionService.getUserByToken(sessionID);
+        User user = sessionService.getUserBySession(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();
@@ -64,7 +64,7 @@ public class FavoritesApi {
     @DeleteMapping("/{fid}")
     public void deleteVideoFromFavorites(@RequestHeader("sessionID") String sessionID,
                                          @PathVariable String fid) {
-        User user = sessionService.getUserByToken(sessionID);
+        User user = sessionService.getUserBySession(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();
@@ -76,7 +76,7 @@ public class FavoritesApi {
     public void patchFavorite(@RequestHeader("sessionID") String sessionID,
                               @RequestHeader(value = "If-Match", required=false) String ifMatch,
                               @PathVariable String fid, @RequestBody Favorite rateFavorite) {
-        User user = sessionService.getUserByToken(sessionID);
+        User user = sessionService.getUserBySession(sessionID);
         Favorite favorite = favoritesRepository.findById(Integer.parseInt(fid)).orElseThrow(ObjectNotInDatabaseException::new);
         if (!favorite.getUser().getUsername().equals(user.getUsername())) {
             throw new FailedAuthenticationException();

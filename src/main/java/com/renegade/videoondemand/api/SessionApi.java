@@ -26,7 +26,7 @@ public class SessionApi {
 
     @DeleteMapping
     public void deleteToken(@RequestHeader("sessionID") String sessionID) {
-        sessionService.deleteToken(sessionID);
+        sessionService.deleteSession(sessionID);
     }
     
 }

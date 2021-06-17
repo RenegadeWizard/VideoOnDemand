@@ -29,7 +29,7 @@ public class MergeApi {
         User user1 = userRepository.findById(username1).orElseThrow(ObjectNotInDatabaseException::new);
         User user2 = userRepository.findById(username2).orElseThrow(ObjectNotInDatabaseException::new);
         mergeFavorites(user1, user2);
-        sessionService.deleteAllUserTokens(user2.getUsername());
+        sessionService.deleteAllUserSessions(user2.getUsername());
         userRepository.deleteById(user2.getUsername());
     }
 

@@ -64,7 +64,7 @@ public class AccountsApi {
     @DeleteMapping("/{username}")
     public void deleteUser(@PathVariable String username) {
         User user = userRepository.findById(username).orElseThrow(ObjectNotInDatabaseException::new);
-        sessionService.deleteAllUserTokens(user.getUsername());
+        sessionService.deleteAllUserSessions(user.getUsername());
         userRepository.deleteById(username);
     }
 

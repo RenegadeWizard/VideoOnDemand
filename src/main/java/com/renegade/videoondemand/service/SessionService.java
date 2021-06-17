@@ -31,18 +31,18 @@ public class SessionService {
         return sessionID;
     }
 
-    public void deleteToken(String sessionID) {
+    public void deleteSession(String sessionID) {
         if (!sessions.containsKey(sessionID)) {
             throw new SessionDoesNotExistException();
         }
         sessions.remove(sessionID);
     }
 
-    public void deleteAllUserTokens(String username) {
+    public void deleteAllUserSessions(String username) {
         while (sessions.values().remove(username));
     }
 
-    public User getUserByToken(String sessionID) {
+    public User getUserBySession(String sessionID) {
         if (!sessions.containsKey(sessionID)) {
             throw new SessionDoesNotExistException();
         }

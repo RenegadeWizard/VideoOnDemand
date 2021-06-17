@@ -19,7 +19,7 @@ public class AccountApi {
 
     @GetMapping
     public ResponseEntity<User> getUser(@RequestHeader("sessionID") String sessionID) {
-        User user = sessionService.getUserByToken(sessionID);
+        User user = sessionService.getUserBySession(sessionID);
         return ResponseEntity.ok()
                 .eTag(user.getVersion().toString())
                 .body(user);
@@ -28,7 +28,7 @@ public class AccountApi {
     @PutMapping
     public void updateUser(@RequestHeader("sessionID") String sessionID, @RequestBody User user,
                            @RequestHeader(value = "If-Match", required=false) String ifMatch) {
-        User userInDatabase = sessionService.getUserByToken(sessionID);
+        User userInDatabase = sessionService.getUserBySession(sessionID);
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(encoder.encode(user.getPassword()));
         userRepository.save(userInDatabase.cloneAll(user));
@@ -36,15 +36,15 @@ public class AccountApi {
 
     @DeleteMapping
     public void deleteUser(@RequestHeader("sessionID") String sessionID) {
-        User user = sessionService.getUserByToken(sessionID);
-        sessionService.deleteAllUserTokens(user.getUsername());
+        User user = sessionService.getUserBySession(sessionID);
+        sessionService.deleteAllUserSessions(user.getUsername());
         userRepository.deleteById(user.getUsername());
     }
 
     @PatchMapping
     public void patchUser(@RequestHeader("sessionID") String sessionID, @RequestBody User user,
                           @RequestHeader(value = "If-Match", required=false) String ifMatch) {
-        User userInDatabase = sessionService.getUserByToken(sessionID);
+        User userInDatabase = sessionService.getUserBySession(sessionID);
         EtagHelper.checkEtagCorrectness(userInDatabase.getVersion(), ifMatch);
         user.setPassword(user.getPassword() != null ? encoder.encode(user.getPassword()) : null);
         userRepository.save(userInDatabase.cloneSome(user));
